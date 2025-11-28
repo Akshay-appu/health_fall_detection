@@ -1,1 +1,1 @@
-web: gunicorn health_fall_detection.wsgi
+web: gunicorn health_fall_detection.wsgi:application
