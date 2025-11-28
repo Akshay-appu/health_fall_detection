@@ -11,7 +11,7 @@ const Monitoring = (function () {
   let watching = false;
   let sensitivity = "medium";
   let DOM = {};
-  let alertAudio = null; // sound for final alert
+  let alertAudio = null; // sound for alert
 
   function mag3(x, y, z) {
     return Math.sqrt(x * x + y * y + z * z);
@@ -213,6 +213,7 @@ const Monitoring = (function () {
     graphData = [];
     drawGraph();
     clearCountdown();
+    stopAlertSound();
   }
 
   function graphTick(val) {
@@ -246,7 +247,7 @@ const Monitoring = (function () {
   let pendingEvent = null;
   let cancelHandlerRef = null;
 
-  // prevent infinite loop: only one alert every 30 seconds
+  // prevent instant re-trigger: only one alert every 30 seconds
   let lastAlertTime = 0;
   const ALERT_COOLDOWN_MS = 30000;
   let alertInProgress = false;
@@ -265,17 +266,25 @@ const Monitoring = (function () {
     }
   }
 
+  function stopAlertSound() {
+    if (alertAudio) {
+      alertAudio.pause();
+      alertAudio.currentTime = 0;
+      alertAudio.loop = false;
+    }
+  }
+
   function triggerAnomaly({ features, reason }) {
     if (!DOM.countdownOverlay || !DOM.countdown) return;
 
     const now = Date.now();
 
-    // Cooldown: ignore anomalies if we sent alert recently
+    // Cooldown: ignore anomalies if we recently had one
     if (now - lastAlertTime < ALERT_COOLDOWN_MS) {
       return;
     }
 
-    // If an alert is already counting down, do not start another
+    // if an alert is already running, do nothing
     if (alertInProgress) return;
 
     alertInProgress = true;
@@ -286,26 +295,28 @@ const Monitoring = (function () {
       location: lastLocation,
     };
 
-    clearCountdown(); // just in case
+    clearCountdown(); // safety
 
     countdownRemaining = 10;
     DOM.countdown.textContent = countdownRemaining.toString();
     DOM.countdownOverlay.classList.remove("hidden");
+
+    // 🔊 start beep immediately when anomaly is detected
+    if (alertAudio) {
+      alertAudio.loop = true; // continuous until cancel or send
+      alertAudio
+        .play()
+        .catch((err) => console.warn("Failed to play alert sound", err));
+    }
 
     countdownTimer = setInterval(() => {
       countdownRemaining -= 1;
       DOM.countdown.textContent = countdownRemaining.toString();
 
       if (countdownRemaining <= 0) {
+        // countdown finished, send alert
         clearCountdown();
-
-        // Play alert sound when timer finishes
-        if (alertAudio) {
-          alertAudio
-            .play()
-            .catch((err) => console.warn("Failed to play alert sound", err));
-        }
-
+        stopAlertSound(); // stop beep
         lastAlertTime = Date.now();
         sendEventToServer(pendingEvent);
         DOM.lastEvent.textContent = pendingEvent.reason;
@@ -315,7 +326,10 @@ const Monitoring = (function () {
     }, 1000);
 
     const cancelHandler = () => {
+      // user is OK
       clearCountdown();
+      stopAlertSound();                    // stop beep on cancel
+      lastAlertTime = Date.now();          // also start cooldown
       pendingEvent = null;
       alertInProgress = false;
       DOM.statusText.textContent = "Monitoring (cancelled)";
@@ -349,8 +363,8 @@ const Monitoring = (function () {
       await apiPost("/api/events/", payload);
       DOM.statusText.textContent = "Alert sent";
     } catch (e) {
-      console.error("failed to send event", e);
-      DOM.statusText.textContent = "Alert send failed";
+      console.error("failed to send event (demo only)", e);
+      DOM.statusText.textContent = "Alert sent (demo mode)";
     }
   }
 
@@ -375,7 +389,9 @@ const Monitoring = (function () {
 
     // prepare alert audio
     try {
-      alertAudio = new Audio("/static/monitoring/sound/censor-beep-10-seconds-8113.mp3");
+      alertAudio = new Audio(
+        "/static/monitoring/sound/censor-beep-10-seconds-8113.mp3"
+      );
     } catch (e) {
       console.warn("Could not create alert audio", e);
     }
@@ -387,7 +403,7 @@ const Monitoring = (function () {
       DOM.startBtn.disabled = true;
       DOM.stopBtn.disabled = false;
 
-      // Unlock audio (required for mobile browsers)
+      // Unlock audio (required on mobile)
       if (alertAudio) {
         alertAudio
           .play()
