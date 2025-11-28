@@ -1,6 +1,13 @@
-/* --------- Global --------- */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #059669;        /* main health green */
+  --primary-dark: #047857;   /* darker green */
+  --accent: #22c55e;         /* accent green */
+  --bg: #ecfdf5;             /* page background */
+}
+
+/* --------- Global --------- */
 
 *,
 *::before,
@@ -12,8 +19,11 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f3f5fb;
-  color: #222;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.15), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 55%),
+    var(--bg);
+  color: #111827;
 }
 
 a {
@@ -25,16 +35,16 @@ button, input, select {
   font-family: inherit;
 }
 
-/* --------- Layout / Topbar --------- */
+/* --------- Topbar / Navigation --------- */
 
 .topbar {
-  background: linear-gradient(90deg, #1976d2, #1e88e5);
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary));
   color: #fff;
   padding: 18px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.2);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -82,7 +92,7 @@ button, input, select {
   opacity: 1;
 }
 
-/* --------- Main container & cards --------- */
+/* --------- Layout / Cards --------- */
 
 .container {
   max-width: 1050px;
@@ -113,7 +123,41 @@ button, input, select {
   font-weight: 600;
 }
 
-/* --------- Forms & controls --------- */
+/* doctor illustration on monitor card */
+
+.monitor-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.monitor-card::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  bottom: -40px;
+  width: 260px;
+  height: 260px;
+  background-image: url("/static/monitoring/img/doctor-hero.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.monitor-card::before {
+  content: "";
+  position: absolute;
+  right: 40px;
+  bottom: 30px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.25), transparent 65%);
+  filter: blur(2px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* --------- Controls / Forms --------- */
 
 .controls {
   display: flex;
@@ -139,13 +183,13 @@ button:active {
 }
 
 #startBtn {
-  background: #1976d2;
+  background: var(--primary);
   color: #fff;
-  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.45);
 }
 
 #startBtn:hover {
-  background: #1565c0;
+  background: var(--primary-dark);
 }
 
 #stopBtn {
@@ -190,7 +234,7 @@ input:focus {
   border-color: #1d4ed8;
 }
 
-/* --------- Monitoring / status section --------- */
+/* --------- Monitoring Status / Sensors --------- */
 
 .status-row {
   display: flex;
@@ -223,7 +267,7 @@ input:focus {
   border: 1px dashed #d1d5db;
 }
 
-/* --------- Overlay (countdown alert) --------- */
+/* --------- Overlay (Anomaly countdown) --------- */
 
 .overlay {
   position: fixed;
@@ -269,7 +313,7 @@ input:focus {
   background: #059669;
 }
 
-/* --------- Contacts page --------- */
+/* --------- Contacts Page --------- */
 
 .contacts-card form {
   display: flex;
@@ -288,7 +332,7 @@ input:focus {
   margin-bottom: 6px;
 }
 
-/* --------- History page --------- */
+/* --------- History Page --------- */
 
 .event-row {
   padding: 8px 10px;
@@ -299,7 +343,7 @@ input:focus {
   margin-bottom: 6px;
 }
 
-/* --------- Dashboard page --------- */
+/* --------- Dashboard Page --------- */
 
 #map {
   height: 380px;
@@ -340,9 +384,10 @@ input:focus {
   font-size: 0.8rem;
   color: #9ca3af;
   margin-top: 26px;
+  letter-spacing: 0.04em;
 }
 
-/* --------- Responsive tweaks --------- */
+/* --------- Responsive Tweaks --------- */
 
 @media (max-width: 768px) {
   .topbar {
@@ -378,5 +423,11 @@ input:focus {
 
   #map {
     height: 260px;
+  }
+
+  /* hide doctor image on small screens for more space */
+  .monitor-card::before,
+  .monitor-card::after {
+    display: none;
   }
 }
