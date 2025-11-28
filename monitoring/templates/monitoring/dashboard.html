@@ -1,7 +1,13 @@
 {% extends 'monitoring/base.html' %}
+{% load static %}
+
 {% block head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<style>#map { height: 400px; width: 100%; margin-top: 10px;} .alerts-table { width: 100%; border-collapse: collapse; } .alerts-table td, .alerts-table th { border: 1px solid #ccc; padding: 6px; }</style>
+<style>
+  #map { height: 400px; width: 100%; margin-top: 10px;}
+  .alerts-table { width: 100%; border-collapse: collapse; }
+  .alerts-table td, .alerts-table th { border: 1px solid #ccc; padding: 6px; }
+</style>
 {% endblock %}
 
 {% block content %}
