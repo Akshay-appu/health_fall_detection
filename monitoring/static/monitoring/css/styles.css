@@ -137,7 +137,7 @@ button, input, select {
   bottom: -40px;
   width: 260px;
   height: 260px;
-  background-image: url("/static/monitoring/img/doctor-hero.png");
+  background-image: url("health.gif");
   background-size: contain;
   background-repeat: no-repeat;
   opacity: 0.95;
