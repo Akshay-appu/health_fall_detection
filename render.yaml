@@ -4,6 +4,8 @@ services:
     name: health-fall-detection
     buildCommand: |
       pip install -r requirements.txt
-      python manage.py migrate --noinput
       python manage.py collectstatic --noinput
-    startCommand: gunicorn health_fall_detection.wsgi:application
+    preDeployCommand: |
+      python manage.py migrate --noinput
+    startCommand: |
+      gunicorn health_fall_detection.wsgi:application
