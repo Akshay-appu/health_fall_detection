@@ -375,7 +375,7 @@ const Monitoring = (function () {
 
     // prepare alert audio
     try {
-      alertAudio = new Audio("monitoring/static/monitoring/sound/censor-beep-10-seconds-8113.mp3");
+      alertAudio = new Audio("/static/monitoring/sound/censor-beep-10-seconds-8113.mp3");
     } catch (e) {
       console.warn("Could not create alert audio", e);
     }
