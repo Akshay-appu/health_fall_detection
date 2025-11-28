@@ -15,6 +15,7 @@ INSTALLED_APPS = [
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <--- ADD THIS LINE
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -35,8 +36,8 @@ TEMPLATES = [{
 }]
 WSGI_APPLICATION = 'health_fall_detection.wsgi.application'
 DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3','NAME': BASE_DIR / 'db.sqlite3',}}
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'monitoring' / 'static']
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [BASE_DIR / 'monitoring' / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Static files (for production)
