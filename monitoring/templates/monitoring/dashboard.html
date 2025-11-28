@@ -1,0 +1,39 @@
+{% extends 'monitoring/base.html' %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>#map { height: 400px; width: 100%; margin-top: 10px;} .alerts-table { width: 100%; border-collapse: collapse; } .alerts-table td, .alerts-table th { border: 1px solid #ccc; padding: 6px; }</style>
+{% endblock %}
+
+{% block content %}
+<h2>Operator Dashboard</h2>
+<div>
+  <label>Filter:
+    <select id="filterType">
+      <option value="">All</option>
+      <option value="fall">Fall</option>
+      <option value="spike">Spike</option>
+      <option value="inactivity">Inactivity</option>
+    </select>
+  </label>
+  <button id="reload">Reload</button>
+</div>
+
+<table class="alerts-table" id="alertsTable">
+  <thead><tr><th>ID</th><th>Type</th><th>Timestamp</th><th>Location</th><th>Status</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<div id="map"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'monitoring/js/ajax_api.js' %}"></script>
+<script>
+  const map = L.map('map').setView([20,0], 2);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+  function loadAlerts(){ apiGet('/api/events/').then(res => { const tbody = document.querySelector('#alertsTable tbody'); tbody.innerHTML = ''; res.events.forEach(ev => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${ev.id}</td><td>${ev.event_type}</td><td>${new Date(ev.timestamp).toLocaleString()}</td><td>${ev.lat || ''}, ${ev.lng || ''}</td><td>${ev.status}</td>`; tr.onclick = () => { if(ev.lat && ev.lng){ map.setView([ev.lat, ev.lng], 14); L.marker([ev.lat, ev.lng]).addTo(map).bindPopup(`${ev.event_type} @ ${new Date(ev.timestamp).toLocaleString()}`).openPopup(); } else { alert('No location for this event.'); } }; tbody.appendChild(tr); }); }); }
+  document.getElementById('reload').addEventListener('click', loadAlerts);
+  loadAlerts();
+</script>
+{% endblock %}

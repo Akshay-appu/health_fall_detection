@@ -1,0 +1,66 @@
+{% extends 'monitoring/base.html' %}
+{% block content %}
+<section class="monitor-card">
+  <h2>Monitoring</h2>
+  <div class="controls">
+    <button id="startBtn">Start Monitoring</button>
+    <button id="stopBtn" disabled>Stop</button>
+    <label for="sensitivity">Sensitivity</label>
+    <select id="sensitivity">
+      <option value="low">Low</option>
+      <option value="medium" selected>Medium</option>
+      <option value="high">High</option>
+    </select>
+  </div>
+
+  <div class="status-row">
+    <div><strong>Status:</strong> <span id="statusText">Idle</span></div>
+    <div><strong>Last Event:</strong> <span id="lastEvent">None</span></div>
+  </div>
+
+  <div class="sensors">
+    <div><strong>Accel (m/s²):</strong> <span id="accelVal">-,-,-</span></div>
+    <div><strong>Gyro (deg/s):</strong> <span id="gyroVal">-,-,-</span></div>
+    <div><strong>Orientation:</strong> <span id="orientVal">n/a</span></div>
+    <div><strong>Location:</strong> <span id="locVal">Not fetched</span></div>
+  </div>
+
+  <div id="miniGraph" class="mini-graph">
+    <canvas id="graphCanvas" width="300" height="80"></canvas>
+  </div>
+</section>
+
+<div id="countdownOverlay" class="overlay hidden">
+  <div class="overlay-card">
+    <h3>Anomaly detected</h3>
+    <p id="overlayMsg">Alert will be sent in <span id="countdown">10</span> seconds.</p>
+    <button id="cancelBtn">I'm OK (Cancel)</button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'monitoring/js/anomaly.js' %}"></script>
+<script src="{% static 'monitoring/js/countdown.js' %}"></script>
+<script src="{% static 'monitoring/js/ajax_api.js' %}"></script>
+<script>
+  window.addEventListener('load', function(){
+    Monitoring.init({
+      startBtnId: 'startBtn',
+      stopBtnId: 'stopBtn',
+      statusTextId: 'statusText',
+      accelValId: 'accelVal',
+      gyroValId: 'gyroVal',
+      orientValId: 'orientVal',
+      locValId: 'locVal',
+      lastEventId: 'lastEvent',
+      graphCanvasId: 'graphCanvas',
+      sensitivityId: 'sensitivity',
+      countdownOverlayId: 'countdownOverlay',
+      cancelBtnId: 'cancelBtn',
+      countdownId: 'countdown'
+    });
+  });
+</script>
+{% endblock %}

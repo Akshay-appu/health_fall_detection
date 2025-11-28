@@ -1,0 +1,2 @@
+async function apiGet(url) { const resp = await fetch(url, { method: 'GET', headers: {'Accept': 'application/json'} }); return resp.json(); }
+async function apiPost(url, payload) { const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRFToken': (typeof CSRF_TOKEN !== 'undefined') ? CSRF_TOKEN : '' }, body: JSON.stringify(payload) }); return resp.json(); }

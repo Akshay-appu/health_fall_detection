@@ -1,0 +1,50 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Health Fall Detection</title>
+  <link rel="stylesheet" href="{% static 'monitoring/css/styles.css' %}">
+  <script>
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    const CSRF_TOKEN = getCookie('csrftoken');
+  </script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="topbar">
+    <h1><a href="{% url 'monitoring:mobile_home' %}">Health Fall Detection</a></h1>
+    <nav class="nav">
+      <a href="{% url 'monitoring:mobile_home' %}">Monitor</a>
+      <a href="{% url 'monitoring:contacts' %}">Contacts</a>
+      <a href="{% url 'monitoring:history' %}">History</a>
+      <a href="{% url 'monitoring:dashboard' %}">Dashboard</a>
+      <a href="{% url 'monitoring:settings' %}">Settings</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <small>Real-Time Emergency Health Alert & Fall Detection — Demo</small>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

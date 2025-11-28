@@ -1,0 +1,25 @@
+{% extends 'monitoring/base.html' %}
+{% block content %}
+<section>
+  <h2>Event History</h2>
+  <div id="historyList">Loading...</div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'monitoring/js/ajax_api.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    apiGet('/api/events/').then(res => {
+      const out = document.getElementById('historyList');
+      out.innerHTML = '';
+      res.events.forEach(ev => {
+        const d = document.createElement('div');
+        d.className = 'event-row';
+        d.innerHTML = `<strong>${ev.event_type}</strong> • ${new Date(ev.timestamp).toLocaleString()} • ${ev.lat || 'no-loc'},${ev.lng || ''} ${ev.is_simulated ? '(sim)' : ''}`;
+        out.appendChild(d);
+      });
+    });
+  });
+</script>
+{% endblock %}
