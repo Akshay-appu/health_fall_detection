@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: health_fall_detection
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py migrate --noinput
+    startCommand: gunicorn health_fall_detection.wsgi:application
