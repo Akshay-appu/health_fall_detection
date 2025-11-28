@@ -328,8 +328,8 @@ const Monitoring = (function () {
     const cancelHandler = () => {
       // user is OK
       clearCountdown();
-      stopAlertSound();                    // stop beep on cancel
-      lastAlertTime = Date.now();          // also start cooldown
+      stopAlertSound(); // stop beep on cancel
+      lastAlertTime = Date.now(); // also start cooldown
       pendingEvent = null;
       alertInProgress = false;
       DOM.statusText.textContent = "Monitoring (cancelled)";
@@ -396,14 +396,15 @@ const Monitoring = (function () {
       console.warn("Could not create alert audio", e);
     }
 
-    // Start button
-    DOM.startBtn.addEventListener("click", () => {
+    // Helper used by both manual start button and auto-start
+    function beginMonitoring() {
+      if (watching) return;
       sensitivity = DOM.sensitivity.value || "medium";
       start();
       DOM.startBtn.disabled = true;
       DOM.stopBtn.disabled = false;
 
-      // Unlock audio (required on mobile)
+      // Unlock audio (required on mobile browsers)
       if (alertAudio) {
         alertAudio
           .play()
@@ -415,7 +416,10 @@ const Monitoring = (function () {
             console.warn("Alert audio not allowed yet:", err);
           });
       }
-    });
+    }
+
+    // Manual Start button (still available)
+    DOM.startBtn.addEventListener("click", beginMonitoring);
 
     // Stop button
     DOM.stopBtn.addEventListener("click", () => {
@@ -423,6 +427,20 @@ const Monitoring = (function () {
       DOM.startBtn.disabled = false;
       DOM.stopBtn.disabled = true;
     });
+
+    // 🔋 Auto-start monitoring on FIRST touch / click anywhere
+    // (still respects browser rule: needs one user gesture)
+    function autoStartHandler() {
+      if (!watching) {
+        beginMonitoring();
+      }
+      // These listeners run only once
+      document.removeEventListener("touchstart", autoStartHandler);
+      document.removeEventListener("click", autoStartHandler);
+    }
+
+    document.addEventListener("touchstart", autoStartHandler, { once: true });
+    document.addEventListener("click", autoStartHandler, { once: true });
   }
 
   return { init, start, stop };
