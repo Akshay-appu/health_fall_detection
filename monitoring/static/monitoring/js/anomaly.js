@@ -11,6 +11,7 @@ const Monitoring = (function () {
   let watching = false;
   let sensitivity = "medium";
   let DOM = {};
+  let alertAudio = null; // sound for final alert
 
   function mag3(x, y, z) {
     return Math.sqrt(x * x + y * y + z * z);
@@ -38,7 +39,9 @@ const Monitoring = (function () {
       ? gyros.reduce((a, b) => a + b, 0) / gyros.length
       : 0;
 
-    const peaks = mags.filter((v) => v > mean + Math.sqrt(variance) * 1.5).length;
+    const peaks = mags.filter(
+      (v) => v > mean + Math.sqrt(variance) * 1.5
+    ).length;
 
     return {
       meanAcc: mean,
@@ -295,6 +298,14 @@ const Monitoring = (function () {
 
       if (countdownRemaining <= 0) {
         clearCountdown();
+
+        // Play alert sound when timer finishes
+        if (alertAudio) {
+          alertAudio
+            .play()
+            .catch((err) => console.warn("Failed to play alert sound", err));
+        }
+
         lastAlertTime = Date.now();
         sendEventToServer(pendingEvent);
         DOM.lastEvent.textContent = pendingEvent.reason;
@@ -362,13 +373,35 @@ const Monitoring = (function () {
     DOM.cancelBtn = document.getElementById(opts.cancelBtnId);
     DOM.countdown = document.getElementById(opts.countdownId);
 
+    // prepare alert audio
+    try {
+      alertAudio = new Audio("monitoring/static/monitoring/sound/censor-beep-10-seconds-8113.mp3");
+    } catch (e) {
+      console.warn("Could not create alert audio", e);
+    }
+
+    // Start button
     DOM.startBtn.addEventListener("click", () => {
       sensitivity = DOM.sensitivity.value || "medium";
       start();
       DOM.startBtn.disabled = true;
       DOM.stopBtn.disabled = false;
+
+      // Unlock audio (required for mobile browsers)
+      if (alertAudio) {
+        alertAudio
+          .play()
+          .then(() => {
+            alertAudio.pause();
+            alertAudio.currentTime = 0;
+          })
+          .catch((err) => {
+            console.warn("Alert audio not allowed yet:", err);
+          });
+      }
     });
 
+    // Stop button
     DOM.stopBtn.addEventListener("click", () => {
       stop();
       DOM.startBtn.disabled = false;
