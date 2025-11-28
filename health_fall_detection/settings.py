@@ -13,7 +13,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'monitoring',
+    'monitoring.apps.MonitoringConfig',  # <-- use AppConfig with ready()
 ]
 
 MIDDLEWARE = [
