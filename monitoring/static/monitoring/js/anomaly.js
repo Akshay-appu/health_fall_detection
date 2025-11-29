@@ -1,5 +1,75 @@
 // monitoring/static/monitoring/js/anomaly.js
 
+// === Emergency contact auto actions (SMS + Call) =========================
+
+// Will hold the first emergency contact's phone number
+let emergencyPhone = null;
+
+// Load first emergency contact (with phone) from backend
+function loadEmergencyContact() {
+  if (typeof apiGet !== "function") {
+    console.warn("apiGet not available yet; emergency contact not loaded.");
+    return;
+  }
+
+  apiGet("/api/contacts/")
+    .then((data) => {
+      if (data && data.contacts && data.contacts.length > 0) {
+        const c = data.contacts[0]; // take the first contact as primary
+        if (c.phone) {
+          emergencyPhone = c.phone;
+          console.log("Loaded emergency phone:", emergencyPhone);
+        } else {
+          console.log("Primary contact has no phone number.");
+        }
+      } else {
+        console.log("No emergency contacts found.");
+      }
+    })
+    .catch((err) => {
+      console.error("Failed to load emergency contact:", err);
+    });
+}
+
+// Build and open SMS with location link
+function sendEmergencySms(latitude, longitude) {
+  if (!emergencyPhone) {
+    alert("No emergency phone number configured in Contacts.");
+    return;
+  }
+
+  let mapsUrl = "";
+  if (latitude != null && longitude != null) {
+    mapsUrl = ` https://www.google.com/maps?q=${latitude},${longitude}`;
+  }
+
+  const message =
+    "Emergency! Possible fall detected. Please check on me." +
+    (mapsUrl ? " Location:" + mapsUrl : "");
+
+  const smsUrl =
+    "sms:" + encodeURIComponent(emergencyPhone) +
+    "?body=" + encodeURIComponent(message);
+
+  // On mobile this opens SMS composer
+  window.location.href = smsUrl;
+}
+
+// Open dialer with emergency phone
+function callEmergencyContact() {
+  if (!emergencyPhone) {
+    alert("No emergency phone number configured in Contacts.");
+    return;
+  }
+  const telUrl = "tel:" + emergencyPhone;
+  window.location.href = telUrl;
+}
+
+// Load emergency contact when page is ready
+document.addEventListener("DOMContentLoaded", loadEmergencyContact);
+
+// ========================================================================
+
 const Monitoring = (function () {
   const WINDOW_MS = 2500;
   const SAMPLE_INTERVAL_MS = 50;
@@ -362,6 +432,18 @@ const Monitoring = (function () {
     try {
       await apiPost("/api/events/", payload);
       DOM.statusText.textContent = "Alert sent";
+
+      // 🔔 After event is saved, trigger SMS + Call
+      const lat = eventObj.location ? eventObj.location.latitude : null;
+      const lng = eventObj.location ? eventObj.location.longitude : null;
+
+      // Open SMS with location link
+      sendEmergencySms(lat, lng);
+
+      // Then open phone dialer after a short delay
+      setTimeout(() => {
+        callEmergencyContact();
+      }, 1500);
     } catch (e) {
       console.error("failed to send event (demo only)", e);
       DOM.statusText.textContent = "Alert sent (demo mode)";
