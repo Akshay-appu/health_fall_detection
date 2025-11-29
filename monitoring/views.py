@@ -127,3 +127,26 @@ def api_events(request):
     send_alerts_for_event(event)
 
     return JsonResponse({"status": "ok"})
+@csrf_exempt
+@require_http_methods(["GET", "DELETE"])
+def api_event_detail(request, event_id):
+    """
+    Simple detail endpoint for a single Event.
+    Used by /api/events/<event_id>/ in monitoring/urls.py
+    """
+    event = get_object_or_404(Event, id=event_id)
+
+    if request.method == "GET":
+        return JsonResponse({
+            "id": event.id,
+            "event_type": event.event_type,
+            "timestamp": event.timestamp.isoformat(),
+            "latitude": event.latitude,
+            "longitude": event.longitude,
+            "status": event.status,
+            "is_simulated": event.is_simulated,
+        })
+
+    # DELETE
+    event.delete()
+    return JsonResponse({"status": "deleted"})
