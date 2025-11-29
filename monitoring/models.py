@@ -10,12 +10,16 @@ class UserProfile(models.Model):
         return self.name or (self.user.username if self.user else 'Anonymous')
 
 class EmergencyContact(models.Model):
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='contacts')
+    user_profile = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name='contacts',
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=200)
     phone = models.CharField(max_length=40, blank=True)
     email = models.EmailField(blank=True)
-    def __str__(self):
-        return f"{self.name} ({self.phone})"
 
 class Event(models.Model):
     EVENT_TYPES = [('fall','Fall'),('spike','Spike'),('inactivity','Inactivity')]
