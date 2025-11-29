@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block content %}
-
 <section class="contacts-card">
   <h2>Emergency Contacts</h2>
+
   <form id="contactForm">
     <input type="text" id="c_name" placeholder="Name" required/>
     <input type="text" id="c_phone" placeholder="Phone"/>
@@ -18,37 +18,64 @@
 
 {% block scripts %}
 <script src="{% static 'monitoring/js/ajax_api.js' %}"></script>
+
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('contactForm');
-    const list = document.getElementById('contactsList');
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('contactForm');
+  const list = document.getElementById('contactsList');
 
-    function refresh(){
-      apiGet('/api/contacts/').then(data => {
-        list.innerHTML = '';
-        data.contacts.forEach(c => {
-          const div = document.createElement('div');
-          div.className = 'contact-row';
-          div.innerHTML = `<strong>${c.name}</strong> ${c.phone ? '• ' + c.phone : ''} ${c.email ? '• ' + c.email : ''}`;
-          list.appendChild(div);
-        });
-      });
-    }
+  function refresh() {
+    apiGet('/api/contacts/').then(data => {
+      list.innerHTML = '';
 
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const payload = {
-        name: document.getElementById('c_name').value,
-        phone: document.getElementById('c_phone').value,
-        email: document.getElementById('c_email').value
-      };
-      apiPost('/api/contacts/', payload).then(()=> {
-        form.reset();
-        refresh();
+      data.contacts.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'contact-row';
+
+        div.innerHTML = `
+          <strong>${c.name}</strong>
+          ${c.phone ? ` • <a href="tel:${c.phone}" class="contact-link">${c.phone}</a>` : ''}
+          ${c.email ? ` • <a href="mailto:${c.email}" class="contact-link">${c.email}</a>` : ''}
+        `;
+
+        list.appendChild(div);
       });
+    });
+  }
+
+  form.onsubmit = (e) => {
+    e.preventDefault();
+
+    const payload = {
+      name: document.getElementById('c_name').value,
+      phone: document.getElementById('c_phone').value,
+      email: document.getElementById('c_email').value
     };
 
-    refresh();
-  });
+    apiPost('/api/contacts/', payload).then(() => {
+      form.reset();
+      refresh();
+    });
+  };
+
+  refresh();
+});
 </script>
+
+<style>
+.contact-link {
+  text-decoration: none;
+  color: #007bff;
+}
+.contact-link:hover {
+  text-decoration: underline;
+}
+.contact-row {
+  padding: 8px;
+  background: #ffffffd2;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 17px;
+}
+</style>
 {% endblock %}
